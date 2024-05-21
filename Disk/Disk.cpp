@@ -3,17 +3,24 @@
 Disk::Disk(const std::string &name) {
     disk_name = name;
     data_array = std::vector<ByteVec>(DISK_CAPACITY,
-                                      ByteVec(std::string(DATA_SIZE, '0')));
+                                      ByteVec(std::string("z")));
 }
 
 
 bool Disk::write(const short &address, const std::string &data) {
     if (address < 0 || address > 63) return false;
-    if (data.size() != DATA_SIZE) return false;
 
     ReadFromFile();
 
-    data_array[address] = ByteVec(data);
+    std::string data_string = data;
+
+    if (data.size() < DATA_SIZE) {
+        while (data_string.size() < DATA_SIZE) {
+            data_string = "0" + data_string;
+        }
+    }
+
+    data_array[address] = ByteVec(data_string);
 
     WriteToFile();
 
@@ -36,22 +43,40 @@ void Disk::WriteToFile() {
     std::ofstream out(disk_name + ".txt");
 
     for (int i = 0; i < DISK_CAPACITY; i++) {
-        out << data_array[i].to_string() << std::endl;
+        if (data_array[i].data[0] == -1) out << "z" << std::endl;
+        else out << data_array[i].to_string() << std::endl;
     }
 
     out.close();
 }
 
 std::string Disk::read(const short &address) {
-    if (address < 0 || address > 63) return std::string{"-1"};
+    if (address < 0 || address >= DISK_CAPACITY) return std::string{"error"};
 
     ReadFromFile();
 
-    return data_array[address].to_string();
+    if (data_array[address].data[0] == -1) return std::string{"empty"};
 
+    std::string data = data_array[address].to_string();
+
+    if (data.size() != DATA_SIZE) return std::string{"service value"};
+
+    return data;
+}
+
+state Disk::check() {
+    if (std::ifstream(disk_name + ".txt"))
+    {
+        return state::Success;
+    }
+    return state::Failure;
 }
 
 ByteVec::ByteVec(const std::string &str_data) {
+    if (str_data == "z") {
+        data.push_back(-1);
+        return;
+    }
     for (int i = 0; i < str_data.size(); i++) {
         data.push_back(convert(str_data[i]));
     }

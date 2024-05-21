@@ -7,12 +7,17 @@
 const short DISK_CAPACITY = 64;
 const short DATA_SIZE = 5;
 
+enum state {
+    Success,
+    Failure
+};
+
 /**
  * Структура ByteVec предназначена для управления данными, представленными в виде целых чисел (байтов).
  */
 struct ByteVec {
     /// Хранит данные в массиве целых чисел.
-    std::vector<unsigned int> data;
+    std::vector<int> data;
 
     /// Конструктор, который принимает строковые данные и преобразует их в вектор целых чисел.
     ByteVec(const std::string &str_data);
@@ -58,6 +63,8 @@ public:
      * @return данные по указанному адресу.
      */
     std::string read(const short &address);
+
+    state check();
 
 private:
     /**
