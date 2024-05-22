@@ -50,17 +50,27 @@ void Disk::WriteToFile() {
     out.close();
 }
 
-std::string Disk::read(const short &address) {
-    if (address < 0 || address >= DISK_CAPACITY) return std::string{"error"};
+std::string Disk::read(const short &address, error_read &error) {
+    if (address < 0 || address >= DISK_CAPACITY) {
+        error = error_read::InvalidAddress;
+        return std::string{"error"};
+    }
 
     ReadFromFile();
 
-    if (data_array[address].data[0] == -1) return std::string{"empty"};
+    if (data_array[address].data[0] == -1) {
+        error = error_read::DataEmpty;
+        return std::string{"empty"};
+    }
 
     std::string data = data_array[address].to_string();
 
-    if (data.size() != DATA_SIZE) return std::string{"service value"};
+    if (data.size() != DATA_SIZE) {
+        error = error_read::ServiceValue;
+        return data;
+    }
 
+    error = error_read::NoError;
     return data;
 }
 

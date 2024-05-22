@@ -4,12 +4,25 @@
 #include <fstream>
 
 
+/// Размер диска
 const short DISK_CAPACITY = 64;
+
+/// Длина блока данных
 const short DATA_SIZE = 5;
 
+/// Перечисление статуса диска
 enum state {
     Success,
     Failure
+};
+
+/// Перечисление с ошибками при чтении данных с диска
+enum error_read {
+    NoError, /// Нет ошибок
+    InvalidAddress, /// Недопустимый адрес
+    DataEmpty, /// Строка ничего не содержит
+    ServiceValue, /// Сервисное значение (избыточный блок)
+    DamagedTooManyDisks /// Недостаточное количество дисков для восстановления или чтения/записи
 };
 
 /**
@@ -59,11 +72,16 @@ public:
 
     /**
      * Читает и возвращает данные по указанному адресу.
-     * @param address - адрес для чтения.
-     * @return данные по указанному адресу.
+     * @param address - адрес для чтения
+     * @param error - ошибка при чтении
+     * @return данные по указанному адресу
      */
-    std::string read(const short &address);
+    std::string read(const short &address, error_read &error);
 
+    /**
+     * Проверяет состояние диска.
+     * @return статус диска
+     */
     state check();
 
 private:
