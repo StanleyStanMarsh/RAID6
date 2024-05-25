@@ -125,7 +125,8 @@ std::string RAID6::read(const short &address, error_read &err) {
         }
 
         std::string read_with_one_recovery = ReadWithOneRecovery(address, extra_disks, broken_disks,
-                                                                 active_data_disks, 0, e);
+                                                                 active_data_disks, 0,
+                                                                 data_disks_indexes, e);
         err = e;
         std::stringstream stream;
         stream << std::setfill('0') << std::setw(14) << read_with_one_recovery;
@@ -168,7 +169,8 @@ std::string RAID6::read(const short &address, error_read &err) {
 
         else if (std::find(extra_disks.begin(), extra_disks.end(), broken_disks[0]) != extra_disks.end()) {
             std::string read_with_one_recovery = ReadWithOneRecovery(address, extra_disks, broken_disks,
-                                                                     active_data_disks, 1, e);
+                                                                     active_data_disks, 1,
+                                                                     data_disks_indexes, e);
             err = e;
             std::stringstream stream;
             stream << std::setfill('0') << std::setw(14) << read_with_one_recovery;
@@ -177,7 +179,8 @@ std::string RAID6::read(const short &address, error_read &err) {
 
         else if (std::find(extra_disks.begin(), extra_disks.end(), broken_disks[1]) != extra_disks.end()) {
             std::string read_with_one_recovery = ReadWithOneRecovery(address, extra_disks, broken_disks,
-                                                                     active_data_disks, 0, e);
+                                                                     active_data_disks, 0,
+                                                                     data_disks_indexes, e);
             err = e;
             std::stringstream stream;
             stream << std::setfill('0') << std::setw(14) << read_with_one_recovery;
@@ -227,14 +230,15 @@ std::string RAID6::ReadDirect(const short &address, const std::vector<int> &extr
 
 std::string RAID6::ReadWithOneRecovery(const short &address, const std::vector<int> &extra_disks,
                                      const std::vector<int> &broken_disks, const std::vector<int> &active_data_disks,
-                                     const int &target_extra_disk, error_read &err) {
+                                     const int &target_extra_disk, const std::map<int, int> &data_disks_indexes,
+                                     error_read &err) {
     std::string res;
 
     std::vector<std::string> data_strings;
     for (int i = 0; i < NUM_OF_DISKS; i++) {
         if (std::find(extra_disks.begin(), extra_disks.end(), i) == extra_disks.end()) {
 
-            if (i == broken_disks[0]) {
+            if (std::find(broken_disks.begin(), broken_disks.end(), i) != broken_disks.end()) {
                 error_read e;
                 auto read_data = disks_array[extra_disks[target_extra_disk]].read(address, e);
 
@@ -245,13 +249,45 @@ std::string RAID6::ReadWithOneRecovery(const short &address, const std::vector<i
 
                 int data_int = std::stoi(read_data, 0, 16);
 
-                for (auto &disk : active_data_disks) {
-                    read_data = disks_array[disk].read(address, e);
-                    if (e != error_read::NoError && e != error_read::ServiceValue) {
-                        err = e;
-                        return "error";
+                if (target_extra_disk == 0) {
+
+                    for (auto &disk: active_data_disks) {
+                        read_data = disks_array[disk].read(address, e);
+                        if (e != error_read::NoError && e != error_read::ServiceValue) {
+                            err = e;
+                            return "error";
+                        }
+                        data_int -= std::stoi(read_data, 0, 16);
                     }
-                    data_int -= std::stoi(read_data, 0, 16);
+                }
+
+                else {
+                    switch(data_disks_indexes.at(i)) {
+                        case 0:
+                            data_int =
+                                    data_int -
+                                    2 * std::stoi(disks_array[active_data_disks[0]].read(address, e),
+                                                  0, 16) -
+                                    3 * std::stoi(disks_array[active_data_disks[1]].read(address, e),
+                                                  0, 16);
+                            break;
+                        case 1:
+                            data_int =
+                                    (data_int -
+                                    std::stoi(disks_array[active_data_disks[0]].read(address, e),
+                                                  0, 16) -
+                                    3 * std::stoi(disks_array[active_data_disks[1]].read(address, e),
+                                                  0, 16)) / 2;
+                            break;
+                        case 2:
+                            data_int =
+                                    (data_int -
+                                    std::stoi(disks_array[active_data_disks[0]].read(address, e),
+                                                  0, 16) -
+                                    2 * std::stoi(disks_array[active_data_disks[1]].read(address, e),
+                                                  0, 16)) / 3;
+                            break;
+                    }
                 }
 
                 std::stringstream stream;

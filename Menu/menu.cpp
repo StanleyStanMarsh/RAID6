@@ -3,9 +3,16 @@
 
 const std::set<char> hex_digits = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
 
+std::string help_text = "Use:\n"
+                        "'<address> write <data (14 bytes)>' to write data\n"
+                        "or\n"
+                        "'<address> read' to read data\n";
+
 // 00 write abc123cd3ef128
 // 00 write 00000142634000
 void menu() {
+    std::cout << "RAID6 implementation application\n"
+    << "Type 'help' for help\n";
     RAID6 raid_arr;
     std::string input;
     while (true) {
@@ -14,11 +21,12 @@ void menu() {
         auto command = split(input, ' ');
 
         if (command.size() < 2 || command.size() > 3) {
-            std::cerr << "Invalid command\n" <<
-            "Use:\n" <<
-            "'<address> write <data (14 bytes)>' to write data\n" <<
-            "or\n" <<
-            "'<address> read' to read data\n" << std::endl;
+            if (command[0] == "help") {
+                std::cout << help_text;
+                continue;
+            }
+            std::cerr << "Invalid command\n" << std::endl;
+            std::cout << help_text;
             continue;
         }
 
@@ -50,11 +58,16 @@ void menu() {
 //                std::cerr << "Invalid data. Data must be in hexadecimal format without leading zeros" << std::endl;
 //                continue;
 //            }
+            bool ok = true;
             for (auto ch: data) {
                 if (hex_digits.count(ch) == 0) {
                     std::cerr << "Invalid data. Data must be in hexadecimal format" << std::endl;
-                    continue;
+                    ok = false;
+                    break;
                 }
+            }
+            if (!ok) {
+                continue;
             }
         }
         if (command_name == "write") {
@@ -80,11 +93,8 @@ void menu() {
             }
         }
         else {
-            std::cerr << "Invalid command\n" <<
-            "Use:\n" <<
-            "'<address> write <data (14 bytes)>' to write data\n" <<
-            "or\n" <<
-            "'<address> read' to read data\n" << std::endl;
+            std::cerr << "Invalid command\n" << std::endl;
+            std::cout << help_text;
         }
     }
 }

@@ -91,7 +91,8 @@ private:
      */
     std::string ReadWithOneRecovery(const short &address, const std::vector<int> &extra_disks,
                                   const std::vector<int> &broken_disks, const std::vector<int> &active_data_disks,
-                                  const int &target_extra_disk, error_read &err);
+                                  const int &target_extra_disk, const std::map<int, int> &data_disks_indexes,
+                                  error_read &err);
 
     /**
      * Реализует чтение с восстановлением двух дисков.
