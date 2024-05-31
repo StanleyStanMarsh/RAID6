@@ -4,7 +4,7 @@
 
 ### Математическое описание
 
-RAID (Redundant Array of Independent Disks) - это технология, позволяющая объединять несколько физических дисков в один логический модуль для улучшения отказоустойчивости и производительности системы. RAID6 - это шестой уровень RAID, который обеспечивает высокую степень надежности за счет двойной четности.
+[RAID](https://www.microsemi.com/product-directory/raid-controllers/4047-raid-levels) (Redundant Array of Independent Disks) - это технология, позволяющая объединять несколько физических дисков в один логический модуль для улучшения отказоустойчивости и производительности системы. RAID6 - это шестой уровень RAID, который обеспечивает высокую степень надежности за счет двойной четности.
 
 ### RAID6
 
@@ -115,7 +115,7 @@ $$
 
 ### Mathematical description
 
-RAID (Redundant Array of Independent Disks) is a technology that allows you to combine multiple physical disks into one logical module to improve system fault tolerance and performance. RAID6 is the sixth RAID level, which provides a high degree of reliability due to double parity.
+[RAID](https://www.microsemi.com/product-directory/raid-controllers/4047-raid-levels) (Redundant Array of Independent Disks) is a technology that allows you to combine multiple physical disks into one logical module to improve system fault tolerance and performance. RAID6 is the sixth RAID level, which provides a high degree of reliability due to double parity.
 
 ### RAID6
 
